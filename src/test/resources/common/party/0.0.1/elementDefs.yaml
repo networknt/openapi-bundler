@@ -1,0 +1,17 @@
+  Key:
+    type: "object"
+    required:
+    - "keyId"
+    - "certificate"
+    properties:
+      keyId:
+        $ref: "#/keyId"
+      certificate:
+        $ref: "#/certificate"
+
+  keyId:
+    type: "string"
+    description: "a unique id"
+  certificate:
+    type: "string"
+    description: "certificate"

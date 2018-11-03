@@ -116,7 +116,7 @@ public class Bundler {
 
 				def = new HashMap<>(definitions);
 				if (debug)
-					System.out.println("start resolve definitions second time ...");
+					System.out.println("start resolve definitions the third time time ...");
 				resolveMap(def);
 
 				Map<String, Object> componentsMap = (Map<String, Object>) map.get("components");
@@ -167,7 +167,9 @@ public class Bundler {
 			// local reference and it has path of "definitions" or 2, local reference
 			// that extracted from reference file with reference to an object directly.
 			String refKey = pointer.substring(pointer.lastIndexOf("/") + 1);
-			// System.out.println("refKey = " + refKey);
+			
+			System.out.println("refKey = " + refKey);
+			
 			if (pointer.contains("components")) {
 				// if the $ref is an object, keep it that way and if $ref is not an object, make
 				// it inline
@@ -221,6 +223,7 @@ public class Bundler {
 				result.put("$ref", "#/components/schemas/" + refKey);
 			} else {
 				// simple type, inline refMap instead.
+				resolveMap(refMap);
 				result = refMap;
 			}
 		}
@@ -278,8 +281,11 @@ public class Bundler {
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 			String key = String.valueOf(entry.getKey());
 			Object value = entry.getValue();
-			if (debug)
+			if (debug) {
 				System.out.println("resolveMap key = " + key + " value = " + value);
+				if(key.equalsIgnoreCase("400"))
+					System.out.println("Reached 400 key");
+			}
 			if (value instanceof Map) {
 				// check if this map is $ref, it should be size = 1
 				if (((Map) value).size() == 1) {

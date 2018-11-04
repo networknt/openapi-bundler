@@ -99,7 +99,8 @@ public class Bundler {
 				Map<String, Object> components = (Map<String, Object>) map.get("components");
 				if ((components != null) && (components.get("schemas") != null)) {
 					definitions.putAll((Map<String, Object>) components.get("schemas"));
-				}
+				} 
+				
 				// now let's handle the references.
 				resolveMap(map);
 				// now the definitions might contains some references that are not in
@@ -119,8 +120,19 @@ public class Bundler {
 					System.out.println("start resolve definitions the third time time ...");
 				resolveMap(def);
 
+				// add the resolved components to the main map, before persisting
+				Map<String, Object> schemasMap = null;
 				Map<String, Object> componentsMap = (Map<String, Object>) map.get("components");
-				Map<String, Object> schemasMap = (Map<String, Object>) componentsMap.get("schemas");
+				if ((componentsMap != null) && (componentsMap.get("schemas") != null)) {
+					schemasMap = (Map<String, Object>) componentsMap.get("schemas");
+				} else {
+					componentsMap = new HashMap<String, Object>();
+					map.put("components", componentsMap);
+					schemasMap = new HashMap<String, Object>();
+					componentsMap.put("schemas", schemasMap);
+				}				
+				
+				//Map<String, Object> schemasMap = (Map<String, Object>) componentsMap.get("schemas");
 				schemasMap.putAll(definitions);
 
 				// convert the map back to json and output it.
@@ -195,8 +207,10 @@ public class Bundler {
 						break;
 				}
 
-				if (refMap == null)
-					System.out.println("null map");
+				if (refMap == null) {
+					System.out.println("ERROR: Could not resolve reference locally in components for key " + refKey + ". Please check your components section.");
+					System.exit(0);					
+				}
 				if (isRefMapObject(refMap)) {
 					definitions.put(refKey, refMap);
 					result.put("$ref", "#/components/schemas/" + refKey);
@@ -283,8 +297,6 @@ public class Bundler {
 			Object value = entry.getValue();
 			if (debug) {
 				System.out.println("resolveMap key = " + key + " value = " + value);
-				if(key.equalsIgnoreCase("400"))
-					System.out.println("Reached 400 key");
 			}
 			if (value instanceof Map) {
 				// check if this map is $ref, it should be size = 1

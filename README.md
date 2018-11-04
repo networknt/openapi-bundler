@@ -103,7 +103,37 @@ Usage: <main class> [options]
       Default: json
     --help, -h      
 ```
+### Sample files
+openapi.yaml
+```
+openapi: 3.0.0
 
+paths: 
+  /test:
+    get:
+      operationId: test
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'common.yaml#/MyObj'
+```
+
+common.yaml
+```
+MyObj:
+  type: object
+  properties:
+    testCode:
+      type: string
+      readOnly: true
+    name:
+      type: string
+      readOnly: true
+```
 ### Use it in an IDE
 
 Another way to run the bundler is from an IDE. Just set the folder of the openapi.yaml file as a program argument and you can easily debug into it.

@@ -36,6 +36,8 @@ should be defined in the components section instead of being de-referenced inlin
 Existing bundlers such as [swagger-cli](https://github.com/BigstickCarpet/swagger-cli)
 cannot handle our specification files correctly, therefore the need arises to create a generally re-usable bundler for OpenAPI definitions.
 
+The tool validates bundled API specifications and offers also independent validation functionality.
+
 ## Features
 
 ### Remote Reference
@@ -67,23 +69,34 @@ are in the right path.
 ### Use it as Java utility
 
 ```
-java -jar target/openapi-bundler.jar <arguments....>
+java -jar target/openapi-bundler.jar <operation> <arguments....>
+
+Operations are:
+  bundle
+  validate
 
 Arguments are:
---dir, -d : The input directory where the YAML files can be found. Must be specified
---file, -f : The name of the YAML file to be bundled. Default = openapi.yaml
---outpu, -o : The output format for the bundled file: yaml | json | both. Default = json
-
-Note: use -DdebugOutput to view debug output
+  --dir, -d : The input directory where the YAML files can be found. Must be specified
+  --file, -f : The name of the YAML file to be bundled. Default = openapi.yaml
+  --output, -o : The output format for the bundled file: yaml | json | both. Default = json
+  -debug : to view debug putput
 
 # General usage:
-java -jar openapi-bundler.jar  -d <myFolder> -f <input file> -o <json|yaml|both>
+  Bundle: 
+    java -jar openapi-bundler.jar bundle -d <myFolder> -f <input file> -o <json|yaml|both> 
 
-# To view debug messages during the bundling process, use the utility with the debugOutput flag
-java -DdebugOutput -jar target/swagger-bundler.jar  <folder of swagger.yaml>
+  Validate:
+    java -jar openapi-bundler.jar bundle -d <myFolder> -f <input file>
 
-# Simplified call, with default values, uses openapi.yaml as input and json as output format
-java -jar openapi-bundler.jar  -d <myFolder>
+# To view debug messages during the bundling or valdiation process, use the utility with -debug
+  java -debug -jar openapi-bundler.jar bundle -d <myFolder> -f <input file> -o <json|yaml|both> 
+
+# To view debug messages during the bundling or valdiation process, use the utility with -debug
+  java -debug -jar openapi-bundler.jar validate -d <myFolder> -f <input file> 
+
+# Simplified bundler call, with default values, uses openapi.yaml as input and json as output format
+java -jar openapi-bundler.jar  bundle -d <myFolder>
+
 
 ```
 
@@ -92,7 +105,9 @@ To view usage help you can use the following command:
 Command:
 java -jar openapi-bundler.jar  -h
 
-Usage: <main class> [options]
+Usage: [options] operation: The operation to be performed. 
+       Supported operations: bundle |validate. Must be specified
+
   Options:
     --dir, -d
       The input directory where the YAML files can be found. Must be specified
@@ -102,6 +117,9 @@ Usage: <main class> [options]
       The output format for the bundled file: yaml | json | both. Default = json
       Default: json
     --help, -h      
+    -debug
+      Debug mode
+      Default: false
 ```
 ### Sample files
 openapi.yaml

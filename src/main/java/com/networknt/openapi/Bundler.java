@@ -1,5 +1,6 @@
 package com.networknt.openapi;
 
+import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,17 +14,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.yaml.snakeyaml.Yaml;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
+import com.networknt.oas.OpenApiParser;
+import com.networknt.oas.model.OpenApi3;
 
 /**
- * Class resolves all externalized references from within an OpenAPI definition file and bundles the output
- * into a single OpenAPI file, in JSON or YAML format
+ * Class resolves all externalized references from within an OpenAPI definition
+ * file and bundles the output into a single OpenAPI file, in JSON or YAML
+ * format
  * 
  * @author ddobrin
  */
@@ -34,7 +37,9 @@ public class Bundler {
 	static Map<String, Map<String, Object>> references = new ConcurrentHashMap<>();
 	static String folder = null;
 	static Map<String, Object> definitions = null;
-	static boolean debug = false;
+
+	@Parameter(description = "operation: The operation to be performed. Supported operations: bundle |validate. Must be specified")
+	String operation;
 
 	@Parameter(names = { "--dir",
 			"-d" }, required = true, description = "The input directory where the YAML files can be found. Must be specified")
@@ -44,80 +49,92 @@ public class Bundler {
 			"-f" }, description = "The name of the YAML file to be bundled. Default = openapi.yaml")
 	String file;
 
-	@Parameter(names = { "--output",
-			"-o" }, description = "The output format for the bundled file: yaml | json | both. Default = json")
+	@Parameter(names = { "--outputFormat",
+			"-o" }, description = "The output format for the bundled file: YAML | JSON | both. Default = JSON")
 	String output = "json";
+
+	@Parameter(names = "-debug", description = "Debug mode")
+	private static boolean debug = false;
 
 	@Parameter(names = { "--help", "-h" }, help = true)
 	private boolean help;
 
 	public static void main(String... argv) {
 		try {
+			//parse the incoming arguments 
+			// supported operation: 
+			// - bundle
+			// - validate
 			Bundler bundler = new Bundler();
 			JCommander jCommander = JCommander.newBuilder().addObject(bundler).build();
 			jCommander.parse(argv);
 			bundler.run(jCommander);
 		} catch (ParameterException e) {
-            System.out.println("Command line parameter error: " + e.getLocalizedMessage());
-            e.usage();
-        }
+			System.out.println("Error while parsing command-line parameters: " + e.getLocalizedMessage());
+			e.usage();
+		}
 	}
 
 	public void run(JCommander jCommander) {
 		// check if help must be displayed
-        if (help) {
-            jCommander.usage();
-            return;
-        }
-        
-		// check if debug output is requested
-		String isDebug = System.getProperty("debugOutput");
-		debug = (isDebug != null) && (isDebug.equals("")) ? true : false;
+		if (help) {
+			jCommander.usage();
+			return;
+		}
 
-		// first important argument is the folder where the YAML files to be bundled are found
-		// second argument is optional; allows the setting of an input file name;
-		// openapi.yaml is the default
+		// first mandatory argument is the folder where the YAML files to be bundled are to be found
+		// second argument is optional; allows the setting of an input file name; openapi.yaml is the default
 		if (dir != null) {
 			folder = dir;
-			System.out.println("OpenAPI Bundler: Bundling API definition in folder: " + folder);
 			// The input parameter is the folder that contains openapi.yaml and
 			// this folder will be the base path to calculate remote references.
 			// if the second argument is a different file name, it will be used
 			// otherwise, default is "openapi.yaml"
 			String fileName = file == null ? "openapi.yaml" : file;
 			
+			// if the operation is validate, validate the file, in YAML or JSON format, then exit the process
+			validateSpecification(folder, fileName);
+			
+			if (operation.equalsIgnoreCase("validate")) 
+				return;
+
+			// bundle the file and validate the resulting file
+			System.out.println(
+					String.format("OpenAPI Bundler: Bundling API definition with file name <%s>, in directory <%s>",
+							fileName, folder));
+
 			Path path = Paths.get(folder, fileName);
 			try (InputStream is = Files.newInputStream(path)) {
 				String json = null;
 				Yaml yaml = new Yaml();
 				Map<String, Object> map = (Map<String, Object>) yaml.load(is);
 
-				// we have to work definitions as a separate map, otherwise, we will have
-				// concurrent access exception while iterate map and update definitions.
+				// we have to handle components as a separate map, otherwise, we will have
+				// concurrent access exception while iterating the map and updating components.
 				definitions = new HashMap<>();
 
 				Map<String, Object> components = (Map<String, Object>) map.get("components");
 				if ((components != null) && (components.get("schemas") != null)) {
 					definitions.putAll((Map<String, Object>) components.get("schemas"));
-				} 
-				
+				}
+
 				// now let's handle the references.
 				resolveMap(map);
 				// now the definitions might contains some references that are not in
 				// definitions.
 				Map<String, Object> def = new HashMap<>(definitions);
 				if (debug)
-					System.out.println("start resolve definitions first time ...");
+					System.out.println("Start resolving components for the first time ...");
 				resolveMap(def);
 
 				def = new HashMap<>(definitions);
 				if (debug)
-					System.out.println("start resolve definitions second time ...");
+					System.out.println("Start resolving components for the second time ...");
 				resolveMap(def);
 
 				def = new HashMap<>(definitions);
 				if (debug)
-					System.out.println("start resolve definitions the third time time ...");
+					System.out.println("Start resolving components for the third time ...");
 				resolveMap(def);
 
 				// add the resolved components to the main map, before persisting
@@ -130,37 +147,42 @@ public class Bundler {
 					map.put("components", componentsMap);
 					schemasMap = new HashMap<String, Object>();
 					componentsMap.put("schemas", schemasMap);
-				}				
-				
-				//Map<String, Object> schemasMap = (Map<String, Object>) componentsMap.get("schemas");
+				}
+
 				schemasMap.putAll(definitions);
 
-				// convert the map back to json and output it.
-				if(output.equalsIgnoreCase("json") || output.equalsIgnoreCase("both")) {
+				// Convert the map back to JSON and serialize it.
+				if (output.equalsIgnoreCase("json") || output.equalsIgnoreCase("both")) {
 					if (debug)
 						System.out.println(
 								"OpenAPI Bundler: write bundled file to openapi.json ... same folder as the openapi.yaml input file...");
 					json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
-	
+
 					// write the output to openapi.json
-					Files.write(Paths.get(folder, "openapi.json"), json.getBytes());
+					Files.write(Paths.get(folder, "openapi.bundled.json"), json.getBytes());
+					
+					// validate the output file
+					validateSpecification(folder, "openapi.bundled.json");
 				}
-				
-				// Dump the output to a YAML file if required
-				if(output.equalsIgnoreCase("yaml") || output.equalsIgnoreCase("both")) {
+
+				// Convert the map back to YAML and serialize it.
+				if (output.equalsIgnoreCase("yaml") || output.equalsIgnoreCase("both")) {
 					if (debug)
 						System.out.println(
-								"OpenAPI Bundler: write bundled file to openapi.bundled.yaml ... same folder as the openapi.yaml input file...");					
+								"OpenAPI Bundler: write bundled file to openapi.bundled.yaml ... same folder as the openapi.yaml input file...");
 					YAMLFactory yamlFactory = new YAMLFactory();
 					yamlFactory.enable(Feature.MINIMIZE_QUOTES);
 					yamlFactory.disable(Feature.SPLIT_LINES);
 					yamlFactory.disable(Feature.WRITE_DOC_START_MARKER);
 					yamlFactory.disable(Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
 					yamlFactory.disable(Feature.LITERAL_BLOCK_STYLE);
-	
+
 					ObjectMapper objMapper = new ObjectMapper(yamlFactory);
 					String yamlOutput = objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
 					Files.write(Paths.get(folder, "openapi.bundled.yaml"), yamlOutput.getBytes());
+					
+					// validate the output file
+					validateSpecification(folder, "openapi.bundled.yaml");
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -169,7 +191,23 @@ public class Bundler {
 			System.out.println("OpenAPI Bundler: ERROR: You must pass in a folder to a yaml file!");
 		}
 
-		System.out.println("OpenAPI Bundler: Bundle complete...");
+		// completed bundling
+		output = output.equalsIgnoreCase("both") ? "YAML & JSON" : output.toUpperCase();
+		System.out.println(String.format(
+				"OpenAPI Bundler: Bundling API definition has completed. Output directory <%s>, in file format %s", dir,
+				output));
+	}
+
+	private static void validateSpecification(String dir, String fileName) {
+		try {
+			@SuppressWarnings("unused")
+			OpenApi3 model = (OpenApi3) new OpenApiParser().parse(new File(folder + "/" + fileName), true);
+
+			System.out.println(String.format("OpenAPI3 Validation: Definition file <%s> in directory <%s> is valid ....", fileName, dir));
+		} catch (Exception e) {
+			System.out.println(
+					String.format("OpenAPI3 Validation: Definition file <%s> in directory <%s> failed with exception %s", fileName, dir, e));
+		}
 	}
 
 	private static Map<String, Object> handlerPointer(String pointer) {
@@ -179,9 +217,10 @@ public class Bundler {
 			// local reference and it has path of "definitions" or 2, local reference
 			// that extracted from reference file with reference to an object directly.
 			String refKey = pointer.substring(pointer.lastIndexOf("/") + 1);
-			
-			System.out.println("refKey = " + refKey);
-			
+
+			if (debug)
+				System.out.println("refKey = " + refKey);
+
 			if (pointer.contains("components")) {
 				// if the $ref is an object, keep it that way and if $ref is not an object, make
 				// it inline
@@ -208,8 +247,9 @@ public class Bundler {
 				}
 
 				if (refMap == null) {
-					System.out.println("ERROR: Could not resolve reference locally in components for key " + refKey + ". Please check your components section.");
-					System.exit(0);					
+					System.out.println("ERROR: Could not resolve reference locally in components for key " + refKey
+							+ ". Please check your components section.");
+					System.exit(0);
 				}
 				if (isRefMapObject(refMap)) {
 					definitions.put(refKey, refMap);

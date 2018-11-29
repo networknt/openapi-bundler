@@ -38,15 +38,15 @@ public class Bundler {
 	static String folder = null;
 	static Map<String, Object> definitions = null;
 
-	@Parameter(description = "operation: The operation to be performed. Supported operations: bundle |validate. Must be specified")
+	@Parameter(description = "operation: The operation to be performed. Supported operations: bundle | validate. Must be specified")
 	String operation;
 
 	@Parameter(names = { "--dir",
-			"-d" }, required = true, description = "The input directory where the YAML files can be found. Must be specified")
+			"-d" }, required = true, description = "The input directory where the YAML files can be found for bundling | validation. Must be specified")
 	String dir;
 
 	@Parameter(names = { "--file",
-			"-f" }, description = "The name of the YAML file to be bundled. Default = openapi.yaml")
+			"-f" }, description = "The name of the YAML file to be bundled or validated. Default = openapi.yaml")
 	String file;
 
 	@Parameter(names = { "--outputFormat",

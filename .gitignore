@@ -2,3 +2,4 @@
 .idea/
 dependency-reduced-pom.xml
 openapi-bundler.iml
+.DS_Store

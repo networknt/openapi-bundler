@@ -76,14 +76,18 @@ Operations are:
   validate
 
 Arguments are:
-  --dir, -d : The input directory where the YAML files can be found. Must be specified
-  --file, -f : The name of the YAML file to be bundled. Default = openapi.yaml
-  --output, -o : The output format for the bundled file: yaml | json | both. Default = json
+  --dir, -d : The input directory where the YAML files can be found for bundling | validation. Mandatory parameter
+  --file, -f : The name of the YAML file to be bundled or validated. Default: openapi.yaml
+
+  --outputFile, -of: The name of the bundled and validated OpenAPI file. Default: openapi.bundled
+  --outputDir, -od : The output directory of the bundled and validated file. Default: same as input directory specified in <dir>
+  --outputFormat, -o : TThe output format for the bundled file: YAML | JSON | both. Default: YAML
+
   -debug : to view debug putput
 
 # General usage:
   Bundle: 
-    java -jar openapi-bundler.jar bundle -d <myFolder> -f <input file> -o <json|yaml|both> 
+    java -jar openapi-bundler.jar bundle -d <myFolder> -f <input file> -o <json|yaml|both> -of <output file name> -od <output folder>
 
   Validate:
     java -jar openapi-bundler.jar bundle -d <myFolder> -f <input file>

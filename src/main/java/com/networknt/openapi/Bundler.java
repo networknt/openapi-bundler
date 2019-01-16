@@ -42,16 +42,24 @@ public class Bundler {
 	String operation;
 
 	@Parameter(names = { "--dir",
-			"-d" }, required = true, description = "The input directory where the YAML files can be found for bundling | validation. Must be specified")
+			"-d" }, required = true, description = "The input directory where the YAML files can be found for bundling | validation. Mandatory parameter.")
 	String dir;
 
 	@Parameter(names = { "--file",
-			"-f" }, description = "The name of the YAML file to be bundled or validated. Default = openapi.yaml")
+			"-f" }, description = "The name of the YAML file to be bundled or validated. Default: openapi.yaml")
 	String file;
 
 	@Parameter(names = { "--outputFormat",
-			"-o" }, description = "The output format for the bundled file: YAML | JSON | both. Default = JSON")
-	String output = "json";
+			"-o" }, description = "The output format for the bundled file: YAML | JSON | both. Default: YAML")
+	String output = "yaml";
+
+	@Parameter(names = { "--outputFile",
+	"-of" }, description = "The name of the bundled and validated OpenAPI file. Default: openapi.bundled")
+	String outputFile = "openapi.bundled";
+
+	@Parameter(names = { "--outputDir",
+	"-od" }, description = "The output directory of the bundled and validated file. Default: same as input directory specified in <dir>")
+	String outputDir;
 
 	@Parameter(names = "-debug", description = "Debug mode")
 	private static boolean debug = false;
@@ -98,9 +106,14 @@ public class Bundler {
 			if (operation.equalsIgnoreCase("validate")) 
 				return;
 
+			// set output directory. 
+			// if not set, default it to the input <dir>
+			if(outputDir == null)
+				outputDir = folder;
+			
 			// bundle the file and validate the resulting file
 			System.out.println(
-					String.format("OpenAPI Bundler: Bundling API definition with file name <%s>, in directory <%s>",
+					String.format("OpenAPI Bundler: Bundling API definition with file name <%s>, from directory <%s>",
 							fileName, folder));
 
 			Path path = Paths.get(folder, fileName);
@@ -155,21 +168,21 @@ public class Bundler {
 				if (output.equalsIgnoreCase("json") || output.equalsIgnoreCase("both")) {
 					if (debug)
 						System.out.println(
-								"OpenAPI Bundler: write bundled file to openapi.json ... same folder as the openapi.yaml input file...");
+								String.format("OpenAPI Bundler: write bundled JSON file to %s ... in directory %s", outputFile, outputDir));
 					json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
 
 					// write the output to openapi.json
-					Files.write(Paths.get(folder, "openapi.bundled.json"), json.getBytes());
+					Files.write(Paths.get(outputDir, String.format("%s.%s", outputFile, "json")), json.getBytes());
 					
 					// validate the output file
-					validateSpecification(folder, "openapi.bundled.json");
+					validateSpecification(outputDir, String.format("%s.%s", outputFile, "json"));
 				}
 
 				// Convert the map back to YAML and serialize it.
 				if (output.equalsIgnoreCase("yaml") || output.equalsIgnoreCase("both")) {
 					if (debug)
 						System.out.println(
-								"OpenAPI Bundler: write bundled file to openapi.bundled.yaml ... same folder as the openapi.yaml input file...");
+								String.format("OpenAPI Bundler: write bundled YAML file to %s ... in directory %s", outputFile, outputDir));
 					YAMLFactory yamlFactory = new YAMLFactory();
 					yamlFactory.enable(Feature.MINIMIZE_QUOTES);
 					yamlFactory.disable(Feature.SPLIT_LINES);
@@ -179,10 +192,10 @@ public class Bundler {
 
 					ObjectMapper objMapper = new ObjectMapper(yamlFactory);
 					String yamlOutput = objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
-					Files.write(Paths.get(folder, "openapi.bundled.yaml"), yamlOutput.getBytes());
+					Files.write(Paths.get(outputDir, String.format("%s.%s", outputFile, "yaml")), yamlOutput.getBytes());
 					
 					// validate the output file
-					validateSpecification(folder, "openapi.bundled.yaml");
+					validateSpecification(outputDir, String.format("%s.%s", outputFile, "yaml"));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -201,7 +214,7 @@ public class Bundler {
 	private static void validateSpecification(String dir, String fileName) {
 		try {
 			@SuppressWarnings("unused")
-			OpenApi3 model = (OpenApi3) new OpenApiParser().parse(new File(folder + "/" + fileName), true);
+			OpenApi3 model = (OpenApi3) new OpenApiParser().parse(new File(dir + "/" + fileName), true);
 
 			System.out.println(String.format("OpenAPI3 Validation: Definition file <%s> in directory <%s> is valid ....", fileName, dir));
 		} catch (Exception e) {

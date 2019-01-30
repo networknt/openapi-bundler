@@ -156,10 +156,15 @@ public class Bundler {
 				if ((componentsMap != null) && (componentsMap.get("schemas") != null)) {
 					schemasMap = (Map<String, Object>) componentsMap.get("schemas");
 				} else {
-					componentsMap = new HashMap<String, Object>();
-					map.put("components", componentsMap);
-					schemasMap = new HashMap<String, Object>();
-					componentsMap.put("schemas", schemasMap);
+					if (componentsMap==null) {
+						componentsMap = new HashMap<String, Object>();
+						map.put("components", componentsMap);
+						schemasMap = new HashMap<String, Object>();
+						componentsMap.put("schemas", schemasMap);
+					} else if (componentsMap.get("schemas")==null) {
+						schemasMap = new HashMap<String, Object>();
+						componentsMap.put("schemas", schemasMap);
+					}
 				}
 
 				schemasMap.putAll(definitions);

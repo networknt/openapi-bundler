@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.networknt</groupId>
     <artifactId>openapi-bundler</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <description>A bundler utlity for OpenAPI files</description>
     <url>https://github.com/networknt/openapi-bundler</url>
     <name>OpenAPIBundler</name>
@@ -69,9 +69,9 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <version.openapi-parser>1.5.28</version.openapi-parser>
+        <version.openapi-parser>1.6.7</version.openapi-parser>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.jackson>2.9.9</version.jackson>
+        <version.jackson>2.9.9.3</version.jackson>
         <version.slf4j>1.7.25</version.slf4j>
         <version.common-lang3>3.8</version.common-lang3>
         <version.jcommander>1.72</version.jcommander>

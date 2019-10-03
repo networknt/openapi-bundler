@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.networknt</groupId>
     <artifactId>openapi-bundler</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <description>A bundler utlity for OpenAPI files</description>
     <url>https://github.com/networknt/openapi-bundler</url>
     <name>OpenAPIBundler</name>

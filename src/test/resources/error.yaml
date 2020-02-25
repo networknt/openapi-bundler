@@ -1,0 +1,7 @@
+Error:
+  type: object
+  required:
+  - statusCode
+  - code
+  - message
+  - description

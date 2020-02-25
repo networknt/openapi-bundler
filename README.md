@@ -83,7 +83,7 @@ Arguments are:
   --outputDir, -od : The output directory of the bundled and validated file. Default: same as input directory specified in <dir>
   --outputFormat, -o : TThe output format for the bundled file: YAML | JSON | both. Default: YAML
 
-  -debug : to view debug putput
+  -debug : to view debug output
 
 # General usage:
   Bundle: 

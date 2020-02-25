@@ -1,0 +1,319 @@
+openapi: 3.0.0
+info:
+  version: 01.01.00
+  title: APITest API documentation.
+  termsOfService: http://api.apitest.com/party/tos/
+servers:
+- url: https://api.apitest.com/v1
+paths:
+  /party/APITest:
+    x-description: Test API Interface Definition.  NOT for use in production.
+    post:
+      security:
+      - party_auth:
+        - party.APITest
+      tags:
+      - Validate
+      deprecated: false
+      description: |
+        Test API Interface Definition.  NOT for use in production.
+
+        ### Change Summary
+
+        * 1.0.0
+          * Initial implementation of the general APITest Operation.
+      summary: Test API Interface Definition.
+      operationId: Test-API-Interface-Definition
+      parameters:
+      - in: header
+        name: X-Correlation-Id
+        description: The correlation ID for this API.
+        required: true
+        schema:
+          type: string
+          maxLength: 1024
+          minLength: 1
+      - in: header
+        name: X-Traceability-Id
+        description: Unique ID created by the client of the API. To be persisted in the Book of Record
+        required: true
+        schema:
+          type: string
+          maxLength: 1024
+          minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                APITest:
+                  $ref: '#/components/schemas/ValidateAPITest'
+      responses:
+        200:
+          description: Successful Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+        default:
+          description: An unexpected error has occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardErrors'
+components:
+  securitySchemes:
+    party_auth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: http://localhost:8888/oauth2/token
+          scopes:
+            party.APITest: Validate access - grant to party/test interface definition operation
+  schemas:
+    ValidateAPITest:
+      type: object
+      properties:
+        APITestAllOf:
+          description: Definition using only the allOf structure
+          type: array
+          items:
+            $ref: '#/components/schemas/APITestAllOf'
+        APITestNestedAllOf:
+          description: This structure demonstrates the use of allOf in a nest and also the use of a single structure (the GetAmount structure) combined with different descriptions using allOf.  It's not a particularly good use of allOf but is supported within the specification and does have some merit over creating identical structures with different descriptions.
+          allOf:
+          - $ref: '#/components/schemas/FundsManaged'
+          - $ref: '#/components/schemas/InFlow'
+          - $ref: '#/components/schemas/OutFlow'
+        APITestOneOf:
+          description: Definition using only the oneOf structure
+          type: array
+          items:
+            $ref: '#/components/schemas/APITestOneOf'
+        APITestAllOfWithOneOfOne:
+          description: Definition using only both the oneOf and allOf structures
+          type: array
+          items:
+            $ref: '#/components/schemas/APITestAllOfWithOneOfOne'
+        APITestAllOfWithOneOfTwo:
+          description: Definition using only both the oneOf and allOf structures
+          type: array
+          items:
+            $ref: '#/components/schemas/APITestAllOfWithOneOfTwo'
+    APITestAllOf:
+      description: Any or all of the elements should be allowed.
+      allOf:
+      - type: object
+        properties:
+          testID:
+            description: The Internal ID of a Party that uniquely identifies the specific party record.
+            type: integer
+            format: int64
+            example: 911015108012
+      - $ref: '#/components/schemas/PartySelection'
+    APITestOneOf:
+      description: Only one of the linkID or testID elements should be allowed
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/LinkID'
+      - $ref: '#/components/schemas/TestID'
+    APITestAllOfWithOneOfOne:
+      type: object
+      allOf:
+      - type: object
+        properties:
+          operationMetaData:
+            $ref: '#/components/schemas/StandardResponse'
+      - $ref: '#/components/schemas/APITestOneOf'
+    APITestAllOfWithOneOfTwo:
+      type: object
+      allOf:
+      - description: Any or all of the elements should be allowed.
+        allOf:
+        - type: object
+          properties:
+            testID:
+              description: The Internal ID of a Party that uniquely identifies the specific party record.
+              type: integer
+              format: int64
+              example: 911015108012
+        - $ref: '#/components/schemas/PartySelection'
+      - $ref: '#/components/schemas/APITestOneOf'
+    NestedAllOf:
+      description: This structure demonstrates the use of allOf in a nest and also the use of a single structure (the GetAmount structure) combined with different descriptions using allOf.  It's not a particularly good use of allOf but is supported within the specification and does have some merit over creating identical structures with different descriptions.
+      allOf:
+      - $ref: '#/components/schemas/FundsManaged'
+      - $ref: '#/components/schemas/InFlow'
+      - $ref: '#/components/schemas/OutFlow'
+    LinkID:
+      type: object
+      properties:
+        linkID:
+          type: string
+          maxLength: 15
+          description: A unique ID that is used to link information together. When sent by a consumer, the consumer should ensure that it is unique within the message.
+    TestID:
+      type: object
+      properties:
+        testID:
+          description: The Internal ID of a Party that uniquely identifies the specific party record.
+          type: integer
+          format: int64
+          example: 911015108012
+    PartySelection:
+      type: object
+      properties:
+        accessCard:
+          description: An APITest Access card number.  Can be either a VISA, MasterCard or Convenience Card number. Must be left zero filled with leading zeros to a length of 20.
+          type: string
+          minLength: 20
+          maxLength: 20
+          example: 00004506445636341032
+        crossReference:
+          $ref: '#/components/schemas/PSCrossReference'
+    FundsManaged:
+      type: object
+      properties:
+        fundsManaged:
+          description: The aggregation of the account balances of each of the party's accounts.
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/GetAmount'
+    InFlow:
+      type: object
+      properties:
+        inFlow:
+          description: The non-prorated amount reflecting incoming funds to the party for the month.
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/GetAmount'
+    OutFlow:
+      type: object
+      properties:
+        outFlow:
+          description: The non-prorated amount reflecting funds paid out by the party for the month.
+          type: object
+          allOf:
+          - $ref: '#/components/schemas/GetAmount'
+    GetAmount:
+      type: object
+      properties:
+        amount:
+          type: string
+        asOfDate:
+          type: string
+          format: date
+          nullable: true
+          description: the date at which the information was current.
+    StandardErrors:
+      type: object
+      properties:
+        error:
+          $ref: 'error.yaml#/Error'
+        operationMetaData:
+          $ref: '#/components/schemas/StandardResponse'
+    StandardResponse:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/ServiceContext'
+        status:
+          type: array
+          items:
+            $ref: 'status.yaml#/StatusItem'
+    PSCrossReference:
+      type: object
+      description: A unique identifier for a client record.
+      required:
+      - externalSystemID
+      - referenceType
+      - ID
+      properties:
+        externalSystemID:
+          description: The ID used to uniquely identify the external system to which this Cross Reference belongs
+          type: integer
+          format: int32
+        referenceType:
+          description: Identifies the type of the Cross Reference.
+          type: integer
+          format: int32
+        ID:
+          type: string
+          maxLength: 40
+          minLength: 1
+    ServiceContext:
+      type: object
+      description: Provides the information required to uniquely identify this service execution instance.
+      required:
+      - transactionID
+      - timeStamp
+      properties:
+        transactionID:
+          description: Provides a unique transaction Identifer with this layer.  Not required to be unique across the enterprise, only within this application.
+          type: string
+        timeStamp:
+          description: Indicates the current system-time of the request.
+          type: string
+          format: date-time
+    # Error:
+    #   type: object
+    #   required:
+    #   - statusCode
+    #   - code
+    #   - message
+    #   - description
+      properties:
+        statusCode:
+          type: integer
+          format: int32
+        code:
+          type: string
+        severityCode:
+          description: This code identifies the severity of an API error.  This code indicates whether there is an API-level error, warning, information message that might need to be communicated to the client or if a severe error has occurred.
+          type: string
+          enum:
+          - INFO
+          - WARN
+          - ERROR
+          - SEVERE
+        message:
+          type: string
+        description:
+          type: string
+    # StatusItem:
+    #   required:
+    #   - statusCode
+    #   - message
+    #   type: object
+    #   properties:
+    #     statusCode:
+    #       type: string
+    #     topic:
+    #       description: The general subject to which the the statusCode applies.
+    #       type: string
+    #     severityCode:
+    #       description: This code identifies the severity of an API error.  This code indicates whether there is an API-level error, warning, information message that might need to be communicated to the client or if a severe error has occurred.
+    #       type: string
+    #       enum:
+    #       - INFO
+    #       - WARN
+    #       - ERROR
+    #       - SEVERE
+    #     message:
+    #       description: A human-readable, language-dependent short description of the error.  Must not be used for automated processing.
+    #       type: string
+    #     description:
+    #       description: A human-readable, longer description that is specific to the nature of the problem or issue encountered.  Must not be used for automated processing.
+    #       type: string
+    #     source:
+    #       $ref: '#/components/schemas/StatusSource'
+    # StatusSource:
+    #   description: The source member is used to indicate which part of the service execution caused an error.  When POINTER is populated, it refers to an item within the request.  Typically only one of 'pointer' or 'parameter' will be populated.
+    #   type: object
+    #   properties:
+    #     pointer:
+    #       description: a JSON Pointer to the specific associated entry in the request document.
+    #       type: string
+    #     parameter:
+    #       type: string

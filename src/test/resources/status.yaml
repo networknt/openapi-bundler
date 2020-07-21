@@ -1,0 +1,36 @@
+StatusItem:
+  required:
+  - statusCode
+  - message
+  type: object
+  properties:
+    statusCode:
+      type: string
+    topic:
+      description: The general subject to which the the statusCode applies.
+      type: string
+    severityCode:
+      description: This code identifies the severity of an API error.  This code indicates whether there is an API-level error, warning, information message that might need to be communicated to the client or if a severe error has occurred.
+      type: string
+      enum:
+      - INFO
+      - WARN
+      - ERROR
+      - SEVERE
+    message:
+      description: A human-readable, language-dependent short description of the error.  Must not be used for automated processing.
+      type: string
+    description:
+      description: A human-readable, longer description that is specific to the nature of the problem or issue encountered.  Must not be used for automated processing.
+      type: string
+    source:
+      $ref: 'status.yaml#/StatusSource'
+StatusSource:
+  description: The source member is used to indicate which part of the service execution caused an error.  When POINTER is populated, it refers to an item within the request.  Typically only one of 'pointer' or 'parameter' will be populated.
+  type: object
+  properties:
+    pointer:
+      description: a JSON Pointer to the specific associated entry in the request document.
+      type: string
+    parameter:
+      type: string

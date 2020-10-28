@@ -1,0 +1,22 @@
+title: Geometry
+description: GeoJSON geometry
+oneOf:
+  - $ref: ./type/GeoJsonPoint.v1.yml
+  - $ref: ./type/GeoJsonLineString.v1.yml
+  - $ref: ./type/GeoJsonPolygon.v1.yml
+  - $ref: ./type/GeoJsonMultiPoint.v1.yml
+  - $ref: ./type/GeoJsonMultiLineString.v1.yml
+  - $ref: ./type/GeoJsonMultiPolygon.v1.yml
+  - $ref: ./type/GeoJsonGeometryCollection.v1.yml
+discriminator:
+  propertyName: type
+  mapping:
+    Point: ./type/GeoJsonPoint.v1.yml
+    LineString: ./type/GeoJsonLineString.v1.yml
+    Polygon: ./type/GeoJsonPolygon.v1.yml
+    MultiPoint: ./type/GeoJsonMultiPoint.v1.yml
+    MultiLineString: ./type/GeoJsonMultiLineString.v1.yml
+    MultiPolygon: ./type/GeoJsonMultiPolygon.v1.yml
+    GeometryCollection: ./type/GeoJsonGeometryCollection.v1.yml
+externalDocs:
+  url: http://geojson.org/geojson-spec.html#geometry-objects

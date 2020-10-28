@@ -1,0 +1,16 @@
+title: GeometryCollection
+type: object
+description: GeoJSon geometry collection
+required:
+  - type
+  - geometries
+externalDocs:
+  url: http://geojson.org/geojson-spec.html#geometrycollection
+properties:
+  type:
+    type: string
+    default: GeometryCollection
+  geometries:
+    type: array
+    items:
+      $ref: ../GeoJsonGeometry.v1.yml

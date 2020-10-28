@@ -1,0 +1,17 @@
+title: MultiLineString
+type: object
+description: GeoJSON geometry
+externalDocs:
+  url: http://geojson.org/geojson-spec.html#id6
+properties:
+  coordinates:
+    type: array
+    items:
+      type: array
+      items:
+        $ref: ../GeoJsonPoint3D.v1.yml
+  type:
+    type: string
+    default: MultiLineString
+required:
+  - type

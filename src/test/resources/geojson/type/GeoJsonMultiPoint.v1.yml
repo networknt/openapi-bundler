@@ -1,0 +1,15 @@
+title: MultiPoint
+type: object
+description: GeoJSON geometry
+externalDocs:
+  url: http://geojson.org/geojson-spec.html#id5
+properties:
+  coordinates:
+    type: array
+    items:
+      $ref: ../GeoJsonPoint3D.v1.yml
+  type:
+    type: string
+    default: MultiPoint
+required:
+  - type

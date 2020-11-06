@@ -1,0 +1,13 @@
+title: Point
+type: object
+description: GeoJSON geometry
+externalDocs:
+  url: http://geojson.org/geojson-spec.html#id2
+properties:
+  coordinates:
+    $ref: ../GeoJsonPoint3D.v1.yml
+  type:
+    type: string
+    default: Point
+required:
+  - type

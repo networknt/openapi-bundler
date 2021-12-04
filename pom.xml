@@ -76,7 +76,7 @@
         <version.common-lang3>3.8</version.common-lang3>
         <version.jcommander>1.72</version.jcommander>
         <version.snakeyaml>1.29</version.snakeyaml>
-        <version.logback>1.2.3</version.logback>
+        <version.logback>1.2.7</version.logback>
         <version.junit>4.13.1</version.junit>
         <version.mockito>2.7.21</version.mockito>
         <version.hamcrest>1.3</version.hamcrest>

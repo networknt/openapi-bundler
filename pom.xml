@@ -71,7 +71,7 @@
         <java.version>11</java.version>
         <version.openapi-parser>2.0.32</version.openapi-parser>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.jackson>2.12.5</version.jackson>
+        <version.jackson>2.13.3</version.jackson>
         <version.slf4j>1.7.36</version.slf4j>
         <version.common-lang3>3.8</version.common-lang3>
         <version.jcommander>1.72</version.jcommander>

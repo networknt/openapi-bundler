@@ -75,7 +75,7 @@
         <version.slf4j>1.7.36</version.slf4j>
         <version.common-lang3>3.8</version.common-lang3>
         <version.jcommander>1.72</version.jcommander>
-        <version.snakeyaml>1.31</version.snakeyaml>
+        <version.snakeyaml>1.32</version.snakeyaml>
         <version.logback>1.2.11</version.logback>
         <version.junit>4.13.1</version.junit>
         <version.mockito>2.7.21</version.mockito>

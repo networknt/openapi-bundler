@@ -2,8 +2,8 @@ package com.networknt.openapi;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class BundlerProcessorTest {
 
@@ -13,7 +13,7 @@ public class BundlerProcessorTest {
         String bundledFile = "openapi.bundled.yaml";
         BundlerProcessor bp = new BundlerProcessor("target/test-classes", "openapi.spec.yaml", "target", bundledFile);
         bp.call();
-        Assert.assertTrue(Files.exists(Paths.get("target", bundledFile)));
+        Assertions.assertTrue(Files.exists(Paths.get("target", bundledFile)));
     }
 
     @Test
@@ -21,6 +21,6 @@ public class BundlerProcessorTest {
         String bundled = "geojsonservice.yml";
         BundlerProcessor bp = new BundlerProcessor(Paths.get("target/test-classes", "geojsonservice.yml"), Paths.get("target"));
         bp.call();
-        Assert.assertTrue(Files.exists(Paths.get("target", "geojsonservice.yml")));
+        Assertions.assertTrue(Files.exists(Paths.get("target", "geojsonservice.yml")));
     }
 }

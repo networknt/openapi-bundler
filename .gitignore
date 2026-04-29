@@ -3,3 +3,7 @@
 dependency-reduced-pom.xml
 openapi-bundler.iml
 .DS_Store
+.gitnexus
+.claude/
+AGENTS.md
+CLAUDE.md

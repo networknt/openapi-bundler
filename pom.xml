@@ -68,7 +68,7 @@
     </distributionManagement>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <version.openapi-parser>2.3.1</version.openapi-parser>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.jackson>2.19.4</version.jackson>
@@ -214,7 +214,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.4</version>
                 <configuration>
-                    <source>1.8</source>
+                    <source>${java.version}</source>
                 </configuration>
                 <executions>
                     <execution>
